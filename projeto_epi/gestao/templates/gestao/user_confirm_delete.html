@@ -1,0 +1,14 @@
+{% extends 'index.html' %}
+{% block title %}Excluir Usuário{% endblock %}
+
+{% block content %}
+    <h1>Excluir Usuário</h1>
+    <p>Você tem certeza que deseja excluir o usuário "{{ object.username }}"?</p>
+    <p>(Atenção: Isso não pode ser desfeito)</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Sim, excluir</button>
+        <a href="{% url 'user_list' %}">Não, cancelar</a>
+    </form>
+{% endblock %}

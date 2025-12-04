@@ -1,0 +1,11 @@
+{% extends 'index.html' %}
+{% block content %}
+    <h1>Excluir Colaborador</h1>
+    <p>Você tem certeza que deseja excluir "{{ object.nome }}"?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Sim, excluir</button>
+        <a href="{% url 'colaborador_list' %}">Não, cancelar</a>
+    </form>
+{% endblock %}

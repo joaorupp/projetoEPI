@@ -1,0 +1,20 @@
+{% extends 'index.html' %}
+
+{% block title %}
+    {% if object %}Editar Colaborador{% else %}Novo Colaborador{% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if object %}
+        <h1>Editar Colaborador</h1>
+    {% else %}
+        <h1>Novo Colaborador</h1>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %} 
+        {{ form.as_p }}
+        <button type="submit">Salvar</button>
+        <a href="{% url 'colaborador_list' %}">Cancelar</a>
+    </form>
+{% endblock %}

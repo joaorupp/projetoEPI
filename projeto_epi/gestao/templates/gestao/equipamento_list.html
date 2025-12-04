@@ -1,0 +1,40 @@
+{% extends 'index.html' %}
+{% block content %}
+    <h1>Lista de Equipamentos (EPIs)</h1>
+<a href="{% url 'equipamento_create' %}">Novo Equipamento</a>
+<hr>
+
+<a href="{% url 'colaborador_list' %}">Ver Colaboradores</a>
+<hr>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Equipamento</th>
+            <th>C.A.</th>
+            <th>Validade</th>
+            <th>Total</th>
+            <th>Disponível</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for epi in equipamentos %}
+        <tr>
+            <td>{{ epi.nome }}</td>
+            <td>{{ epi.ca }}</td>
+            <td>{{ epi.data_validade|date:"d/m/Y" }}</td> <td>{{ epi.quantidade_total }}</td>
+            <td>{{ epi.quantidade_disponivel }}</td>
+            <td>
+                <a href="{% url 'equipamento_update' epi.pk %}">Editar</a>
+                <a href="{% url 'equipamento_delete' epi.pk %}">Excluir</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">Nenhum equipamento cadastrado.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

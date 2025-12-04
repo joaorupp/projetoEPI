@@ -1,0 +1,36 @@
+{% extends 'index.html' %}
+
+{% block title %}Lista de Colaboradores{% endblock %}
+
+{% block content %}
+<h1>Lista de Colaboradores</h1>
+<a href="{% url 'colaborador_create' %}">Novo Colaborador</a>
+<hr>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Matrícula</th>
+            <th>Cargo</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for colab in colaboradores %}
+        <tr>
+            <td>{{ colab.nome }}</td>
+            <td>{{ colab.matricula }}</td>
+            <td>{{ colab.cargo }}</td>
+            <td>
+                <a href="{% url 'colaborador_update' colab.pk %}">Editar</a>
+                <a href="{% url 'colaborador_delete' colab.pk %}">Excluir</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">Nenhum colaborador cadastrado.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

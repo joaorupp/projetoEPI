@@ -1,0 +1,37 @@
+{% extends 'index.html' %}
+{% block title %}Empréstimos Ativos{% endblock %}
+
+{% block content %}
+    <h1>Empréstimos Ativos</h1>
+    <p>(EPIs que ainda não foram devolvidos)</p>
+    <a href="{% url 'emprestimo_create' %}">Registrar Novo Empréstimo</a>
+    <hr>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Equipamento (EPI)</th>
+                <th>Colaborador</th>
+                <th>Data do Empréstimo</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for emp in emprestimos %}
+            <tr>
+                <td>{{ emp.equipamento.nome }} (C.A: {{ emp.equipamento.ca }})</td>
+                <td>{{ emp.colaborador.nome }} (Mat: {{ emp.colaborador.matricula }})</td>
+                <td>{{ emp.data_emprestimo|date:"d/m/Y H:i" }}</td> <td>
+                    <form method="POST" action="{% url 'emprestimo_devolver' emp.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit">Registrar Devolução</button>
+                </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">Nenhum empréstimo ativo no momento.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

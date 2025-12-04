@@ -1,0 +1,13 @@
+ /* CSS muito básico apenas para visualizar o layout */
+        body { font-family: Arial, sans-serif; margin: 0; }
+        .header { background: #333; color: white; padding: 15px; }
+        .sidebar {
+            float: left; width: 20%; 
+            background: #f4f4f4; padding: 15px; 
+            height: 80vh; /* Altura de exemplo */
+        }
+        .content {
+            float: left; width: 75%; 
+            padding: 15px;
+        }
+        .sidebar a { display: block; padding: 8px; text-decoration: none; }

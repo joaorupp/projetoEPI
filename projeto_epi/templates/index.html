@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestão de EPIs{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+</head>
+<body>
+
+    <header class="header">
+        <h2>Sistema de Gestão de EPIs</h2>
+    </header>
+
+    <nav class="sidebar">
+        <h3>Menu</h3>
+        <ul>
+            <li><a href="{% url 'colaborador_list' %}">Colaboradores</a></li>
+            <li><a href="{% url 'equipamento_list' %}">EPIs</a></li>
+            <li><a href="{% url 'emprestimo_list' %}">Empréstimos</a></li>
+            <li><a href="{% url 'user_list' %}">Usuários</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>

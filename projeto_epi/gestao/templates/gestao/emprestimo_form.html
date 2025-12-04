@@ -1,0 +1,13 @@
+{% extends 'index.html' %}
+{% block title %}Registrar Empréstimo{% endblock %}
+
+{% block content %}
+    <h1>Registrar Novo Empréstimo</h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }} <button type="submit">Salvar Empréstimo</button>
+        <a href="{% url 'emprestimo_list' %}">Cancelar</a>
+    </form>
+{% endblock %}

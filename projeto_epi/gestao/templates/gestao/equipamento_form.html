@@ -1,0 +1,15 @@
+{% extends 'index.html' %}
+{% block content %}
+    {% if object %}
+    <h1>Editar Equipamento</h1>
+    {% else %}
+    <h1>Novo Equipamento</h1>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }} <button type="submit">Salvar</button>
+        <a href="{% url 'equipamento_list' %}">Cancelar</a>
+    </form>
+{% endblock %}
