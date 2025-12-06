@@ -1,13 +1,342 @@
- /* CSS muito básico apenas para visualizar o layout */
-        body { font-family: Arial, sans-serif; margin: 0; }
-        .header { background: #333; color: white; padding: 15px; }
-        .sidebar {
-            float: left; width: 20%; 
-            background: #f4f4f4; padding: 15px; 
-            height: 80vh; /* Altura de exemplo */
-        }
-        .content {
-            float: left; width: 75%; 
-            padding: 15px;
-        }
-        .sidebar a { display: block; padding: 8px; text-decoration: none; }
+/* --- Reset Básico e Fontes --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #F1F5F9; /* Fundo cinza claro geral */
+    color: #1F2937;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Variáveis de Cores --- */
+:root {
+    --dark-bg: #1E293B;       /* Azul escuro do header/sidebar */
+    --sidebar-active: #334155; /* Cor do item de menu ativo */
+    --primary-blue: #2563EB;   /* Azul dos botões editar */
+    --primary-blue-hover: #1d4ed8;
+    --danger-red: #DC2626;     /* Vermelho dos botões excluir */
+    --danger-red-hover: #b91c1c;
+    --success-green: #16a34a;  /* Verde do botão novo */
+    --success-green-hover: #15803d;
+    --border-color: #E2E8F0;   /* Cor das bordas sutis */
+    --table-header-bg: #F8FAFC; /* Fundo do cabeçalho da tabela */
+    --text-muted: #64748B;     /* Texto cinza secundário */
+}
+
+/* --- Cabeçalho Superior (Navbar) --- */
+.top-header {
+    background-color: var(--dark-bg);
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    height: 64px;
+    flex-shrink: 0;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-icon {
+    font-size: 1.8rem;
+    color: rgb(246, 246, 2);
+}
+
+.top-header h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* --- Layout Principal (Sidebar + Conteúdo) --- */
+.main-container {
+    display: flex;
+    flex: 1; /* Ocupa o resto da altura da tela */
+    overflow: hidden; /* Impede scroll duplo na página inteira */
+}
+
+/* --- Sidebar (Barra Lateral) --- */
+.sidebar {
+    background-color: var(--dark-bg);
+    color: #94A3B8;
+    width: 250px;
+    padding: 1.5rem 1rem;
+    flex-shrink: 0;
+    overflow-y: auto;
+}
+
+.menu-label {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    padding-left: 0.75rem;
+}
+
+.sidebar-menu ul {
+    list-style: none;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.25rem;
+    transition: background-color 0.2s;
+}
+
+.menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.menu-item.active {
+    background-color: var(--sidebar-active);
+    color: white;
+}
+
+.menu-item .icon {
+    margin-right: 0.75rem;
+    width: 20px;
+    text-align: center;
+}
+
+.menu-item .text {
+    flex: 1;
+    font-weight: 500;
+}
+
+/* --- Área de Conteúdo Principal --- */
+.content-area {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto; /* Scroll apenas aqui dentro */
+}
+
+/* --- Estilos da Tabela (Para usar nos seus templates filhos) --- */
+.content-box {
+    background-color: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.data-table thead {
+    background-color: var(--table-header-bg);
+}
+
+.data-table th, 
+.data-table td {
+    padding: 1rem 1.5rem;
+}
+
+.data-table th {
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.data-table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table tbody tr:hover {
+    background-color: #F8FAFC;
+}
+
+/* Botões de Ação */
+.btn-editar, .btn-excluir, .btn-success {
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-block;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-editar { background-color: var(--primary-blue); }
+.btn-excluir { background-color: var(--danger-red); margin-left: 5px; }
+.btn-success { background-color: var(--success-green); }
+
+/* Títulos das páginas */
+h2 {
+    color: #1E40AF;
+    margin-bottom: 1rem;
+}
+
+/* --- Estilos de Formulário Moderno --- */
+
+/* Container do formulário (o cartão branco) */
+.form-card {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 0.75rem; /* Cantos arredondados */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    border: 1px solid var(--border-color);
+    max-width: 600px; /* Impede que o formulário fique largo demais */
+}
+
+/* Grupos de campos (Espaço entre cada pergunta) */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+/* Etiquetas (Labels - "Nome", "Matrícula") */
+.form-label {
+    display: block; /* Força o label a ficar em cima do input */
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151; /* Cinza escuro */
+    font-size: 0.9rem;
+}
+
+/* Campos de Texto (Inputs) */
+/* O seletor abaixo pega inputs de texto, email, números e selects */
+.form-input, 
+input[type="text"], 
+input[type="email"], 
+input[type="number"], 
+select {
+    width: 100%; /* Ocupa 100% do espaço disponível */
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    background-color: #F8FAFC; /* Fundo levemente cinza */
+}
+
+/* Efeito ao clicar no campo (Foco) */
+.form-input:focus,
+input[type="text"]:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary-blue); /* Fica azul */
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); /* Brilho azul suave */
+}
+
+/* Área dos Botões (Salvar / Cancelar) */
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* Espaço entre os botões */
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Botão Salvar (Reutilizando estilo, mas garantindo submit) */
+.btn-submit {
+    background-color: var(--success-green);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+.btn-submit:hover {
+    background-color: var(--success-green-hover);
+}
+
+/* Botão Cancelar (Estilo secundário/cinza) */
+.btn-cancel {
+    text-decoration: none;
+    color: #64748B;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    transition: all 0.2s;
+}
+.btn-cancel:hover {
+    background-color: #F1F5F9;
+    color: #0F172A;
+}
+
+/* --- Estilos para Página de Exclusão (Alerta) --- */
+
+/* Cartão Centralizado para Avisos */
+.alert-card {
+    background-color: white;
+    padding: 3rem 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--border-color);
+    max-width: 500px;
+    margin: 3rem auto; /* Centraliza na tela */
+    text-align: center; /* Texto centralizado */
+}
+
+/* Ícone de Aviso Grande */
+.alert-icon {
+    font-size: 4rem;
+    color: var(--danger-red);
+    margin-bottom: 1.5rem;
+}
+
+/* Título do Alerta */
+.alert-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1F2937;
+    margin-bottom: 1rem;
+}
+
+/* Texto de Descrição */
+.alert-text {
+    color: #64748B;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.alert-text strong {
+    color: #1F2937;
+    font-weight: 600;
+}
+
+/* Botão de Exclusão Grande (Largo) */
+.btn-danger-large {
+    background-color: var(--danger-red);
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+.btn-danger-large:hover {
+    background-color: var(--danger-red-hover);
+}

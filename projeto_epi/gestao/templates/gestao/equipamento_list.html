@@ -1,13 +1,14 @@
 {% extends 'index.html' %}
 {% block content %}
-    <h1>Lista de Equipamentos (EPIs)</h1>
-<a href="{% url 'equipamento_create' %}">Novo Equipamento</a>
-<hr>
 
-<a href="{% url 'colaborador_list' %}">Ver Colaboradores</a>
-<hr>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>Equipamentos</h2>
+    <a href="{% url 'equipamento_create' %}" class="btn-novo">
+        <i class="fa-solid fa-plus"></i> Novo Equipamento
+    </a>
+</div>
 
-<table border="1">
+<table class="data-table">
     <thead>
         <tr>
             <th>Equipamento</th>
@@ -23,7 +24,8 @@
         <tr>
             <td>{{ epi.nome }}</td>
             <td>{{ epi.ca }}</td>
-            <td>{{ epi.data_validade|date:"d/m/Y" }}</td> <td>{{ epi.quantidade_total }}</td>
+            <td>{{ epi.data_validade|date:"d/m/Y" }}</td>
+            <td>{{ epi.quantidade_total }}</td>
             <td>{{ epi.quantidade_disponivel }}</td>
             <td>
                 <a href="{% url 'equipamento_update' epi.pk %}">Editar</a>

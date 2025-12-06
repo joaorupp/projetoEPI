@@ -109,13 +109,18 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
+# Habilita o suporte a fuso horário no Django (Deve ser True)
 USE_TZ = True
+
+# Define o fuso horário padrão do projeto
+TIME_ZONE = 'America/Sao_Paulo'
+
+# Define o idioma para Português do Brasil (opcional, mas recomendado)
+LANGUAGE_CODE = 'pt-br'
+
+# Define o formato de data e hora local (opcional)
+USE_I18N = True  # Habilita internacionalização
+USE_L10N = True  # Habilita localização de formatos (como usar dd/mm/yyyy)
 
 
 # Static files (CSS, JavaScript, Images)

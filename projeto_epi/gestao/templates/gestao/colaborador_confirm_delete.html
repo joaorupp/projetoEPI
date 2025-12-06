@@ -1,11 +1,39 @@
 {% extends 'index.html' %}
 {% block content %}
-    <h1>Excluir Colaborador</h1>
+    <!-- <h1>Excluir Colaborador</h1>
     <p>Você tem certeza que deseja excluir "{{ object.nome }}"?</p>
 
     <form method="post">
         {% csrf_token %}
-        <button type="submit">Sim, excluir</button>
+        <button class="btn " type="submit">Sim, excluir</button>
         <a href="{% url 'colaborador_list' %}">Não, cancelar</a>
-    </form>
+    </form> -->
+
+    <div class="alert-card">
+        <div class="alert-icon">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+
+        <h2 class="alert-title">Excluir Colaborador</h2>
+
+        <p class="alert-text">
+            Você tem certeza que deseja excluir o colaborador<br>
+            <strong>"{{ object.nome }}"</strong>?
+            <br><span style="font-size: 0.9rem;">Esta ação não poderá ser desfeita.</span>
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-actions" style="justify-content: center; border-top: none;">
+                <button type="submit" class="btn-danger-large">
+                    Sim, excluir
+                </button>
+
+                <a href="{% url 'colaborador_list' %}" class="btn-cancel">
+                    Não, cancelar
+                </a>
+            </div>
+        </form>
+    </div>
 {% endblock %}
