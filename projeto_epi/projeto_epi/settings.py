@@ -55,8 +55,10 @@ ROOT_URLCONF = 'projeto_epi.urls'
 
 TEMPLATES = [
     {
+        
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        # 'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS':[],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -85,6 +87,8 @@ DATABASES = {
         'PORT': '3306',           # Porta padrão do MySQL
     }
 }
+
+AUTH_USER_MODEL = 'gestao.Usuario'
 
 
 # Password validation
@@ -137,3 +141,14 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'
+
+# Define para onde o Django deve mandar o usuário não logado
+LOGIN_URL = 'login'
+
+# Define para onde o usuário vai após fazer o login com sucesso
+LOGIN_REDIRECT_URL = 'home'
+
+# Define para onde o usuário vai após fazer logout
+LOGOUT_REDIRECT_URL = 'login'

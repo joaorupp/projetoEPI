@@ -2,164 +2,148 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
     ListView, CreateView, UpdateView, DeleteView, View)
-from .models import Colaborador, Equipamento, Emprestimo
+from .models import Colaborador, Equipamento, Emprestimo, Usuario # Importado o novo modelo Usuario
 from django.utils import timezone
 from .forms import (
     ColaboradorForm, EquipamentoForm,
     CustomUserCreationForm, UserUpdateForm, EmprestimoForm
 )
-from django.contrib.auth.models import User
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib import messages
+
+# --- MIDDLEWARE DE PROTEÇÃO (ATV:02) ---
+# Verifica se o usuário é Administrador para permitir DELETE
+class AdminRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.perfil == 'admin'
+
 def home(request):
-    return render(request, "index.html")
-# Read (Listar)
-class ColaboradorListView(ListView):
+    return render(request, "gestao/index.html")
+
+# --- COLABORADOR ---
+class ColaboradorListView(LoginRequiredMixin, ListView):
     model = Colaborador
     template_name = 'gestao/colaborador_list.html'
-    context_object_name = 'colaboradores' # Nome da variável na lista
-    queryset = Colaborador.objects.filter(ativo=True) # Apenas colaboradores ativos
+    context_object_name = 'colaboradores'
+    queryset = Colaborador.objects.filter(ativo=True)
 
-# Create (Criar)
-class ColaboradorCreateView(CreateView):
-    model = Colaborador
-    form_class = ColaboradorForm
-    template_name = 'gestao/colaborador_form.html'
-    success_url = reverse_lazy('colaborador_list') # Para onde vai após criar
-
-# Update (Atualizar)
-class ColaboradorUpdateView(UpdateView):
+class ColaboradorCreateView(LoginRequiredMixin, CreateView):
     model = Colaborador
     form_class = ColaboradorForm
     template_name = 'gestao/colaborador_form.html'
     success_url = reverse_lazy('colaborador_list')
 
-# Delete (Excluir)
-class ColaboradorDeleteView(DeleteView):
+class ColaboradorUpdateView(LoginRequiredMixin, UpdateView):
+    model = Colaborador
+    form_class = ColaboradorForm
+    template_name = 'gestao/colaborador_form.html'
+    success_url = reverse_lazy('colaborador_list')
+
+class ColaboradorDeleteView(AdminRequiredMixin, DeleteView): # Apenas Admin apaga (ATV:02)
     model = Colaborador
     template_name = 'gestao/colaborador_confirm_delete.html'
     success_url = reverse_lazy('colaborador_list')
 
-# Read (Listar EPIs)
-class EquipamentoListView(ListView):
+# --- EQUIPAMENTO (EPI) ---
+class EquipamentoListView(LoginRequiredMixin, ListView):
     model = Equipamento
     template_name = 'gestao/equipamento_list.html'
     context_object_name = 'equipamentos'
 
-# Create (Criar EPI)
-class EquipamentoCreateView(CreateView):
+    # ATV:03 - Filtros por nome e paginação (Lógica simplificada para a view)
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        nome = self.request.GET.get('nome')
+        if nome:
+            queryset = queryset.filter(nome__icontains=nome)
+        return queryset
+
+class EquipamentoCreateView(LoginRequiredMixin, CreateView):
     model = Equipamento
     form_class = EquipamentoForm
     template_name = 'gestao/equipamento_form.html'
     success_url = reverse_lazy('equipamento_list')
 
-# Update (Atualizar EPI)
-class EquipamentoUpdateView(UpdateView):
-    model = Equipamento
-    form_class = EquipamentoForm
-    template_name = 'gestao/equipamento_form.html'
-    success_url = reverse_lazy('equipamento_list')
-
-# Delete (Excluir EPI)
-class EquipamentoDeleteView(DeleteView):
+class EquipamentoDeleteView(AdminRequiredMixin, DeleteView): # Apenas Admin (ATV:02)
     model = Equipamento
     template_name = 'gestao/equipamento_confirm_delete.html'
     success_url = reverse_lazy('equipamento_list')
 
-# Read (Listar Usuários)
-class UserListView(ListView):
-    model = User
-    template_name = 'gestao/user_list.html'
-    context_object_name = 'usuarios'
-    # Boa prática: não listar o superusuário se houver muitos
-    queryset = User.objects.filter(is_superuser=False)
-
-# Create (Criar Usuário)
-class UserCreateView(CreateView):
-    model = User
-    form_class = CustomUserCreationForm # <- Usando o form especial
-    template_name = 'gestao/user_form.html'
-    success_url = reverse_lazy('user_list')
-
-# Update (Atualizar Usuário)
-class UserUpdateView(UpdateView):
-    model = User
-    form_class = UserUpdateForm # <- Usando o form de atualização
-    template_name = 'gestao/user_form.html'
-    success_url = reverse_lazy('user_list')
-
-# Delete (Excluir Usuário)
-class UserDeleteView(DeleteView):
-    model = User
-    template_name = 'gestao/user_confirm_delete.html'
-    success_url = reverse_lazy('user_list')
-
-class EmprestimoListView(ListView):
+# --- GESTÃO DE MOVIMENTAÇÃO / EMPRÉSTIMO ---
+class EmprestimoListView(LoginRequiredMixin, ListView):
     model = Emprestimo
     template_name = 'gestao/emprestimo_list.html'
     context_object_name = 'emprestimos'
 
-    # Vamos mostrar apenas os empréstimos ATIVOS (não devolvidos)
     def get_queryset(self):
         return Emprestimo.objects.filter(data_devolucao__isnull=True)
 
-# Create (Criar Empréstimo)
-class EmprestimoCreateView(CreateView):
-
+class EmprestimoCreateView(LoginRequiredMixin, CreateView):
     model = Emprestimo
     form_class = EmprestimoForm
     template_name = 'gestao/emprestimo_form.html'
     success_url = reverse_lazy('emprestimo_list')
 
-    # ---- AQUI ESTÁ A LÓGICA DE NEGÓCIO ----
-    # Sobrescrevemos o método que é chamado quando o formulário é válido
+    # ---- ATV:04 e ATV:05 - REGRAS DE NEGÓCIO E TRAVA DE ESTOQUE ----
     def form_valid(self, form):
-        # 1. Pega o objeto do formulário, mas não salva no banco ainda
-        emprestimo = form.save(commit=False)
+        movimentacao = form.save(commit=False)
+        epi = movimentacao.equipamento
+        qtd_solicitada = movimentacao.quantidade_retirada # Usando o campo novo do models
 
-        # 2. Define a data do empréstimo (já que não pedimos no form)
-        emprestimo.data_emprestimo = timezone.now()
-
-        # 3. Pega o EPI que foi selecionado
-        epi = emprestimo.equipamento
-
-        # 4. DECREMENTA O ESTOQUE
-        # (Já checamos se é > 0 no Formulário,
-        #  mas uma dupla checagem é segura)
-        if epi.quantidade_disponivel > 0:
-            epi.quantidade_disponivel -= 1
-            epi.save() # Salva a mudança no EPI
-
-            # 5. Agora sim, salva o Empréstimo no banco
-            emprestimo.save()
-        else:
-            # Se algo deu errado (ex: estoque acabou durante o preenchimento)
-            form.add_error('equipamento', 'Este EPI não está mais disponível em estoque.')
+        # 1. VALIDAÇÃO DE ESTOQUE (Critério de Aceite da Prova)
+        if qtd_solicitada > epi.quantidade_disponivel:
+            # Mensagem exata exigida pelo enunciado da prova 
+            erro_msg = f"Saída não permitida: estoque insuficiente. Disponível: {epi.quantidade_disponivel}. Solicitado: {qtd_solicitada}."
+            form.add_error('quantidade_retirada', erro_msg)
             return self.form_invalid(form)
 
-        # 6. Redireciona para a success_url (a lista)
+        # 2. RASTREABILIDADE (ATV:04)
+        movimentacao.usuario_responsavel = self.request.user # Grava o usuário logado 
+        movimentacao.data_emprestimo = timezone.now()
+        
+        # 3. ATUALIZAÇÃO DO SALDO
+        epi.quantidade_disponivel -= qtd_solicitada
+        epi.save()
+
+        movimentacao.save()
         return super().form_valid(form)
 
-class EmprestimoDevolucaoView(View):
-    # Esta view não tem template (GET), ela só processa o POST
-
+class EmprestimoDevolucaoView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
-        # 1. 'pk' é o ID do Empréstimo, que virá pela URL
-        emprestimo_pk = self.kwargs.get('pk')
-
-        # 2. Busca o empréstimo ou retorna erro 404
-        emprestimo = get_object_or_404(Emprestimo, pk=emprestimo_pk)
-
-        # 3. LÓGICA DE NEGÓCIO: Só devolve se não estiver devolvido
+        emprestimo = get_object_or_404(Emprestimo, pk=self.kwargs.get('pk'))
         if emprestimo.data_devolucao is None:
-            # 4. Define a data da devolução
             emprestimo.data_devolucao = timezone.now()
             emprestimo.save()
 
-            # 5. LÓGICA DE ESTOQUE: Incrementa a quantidade
             epi = emprestimo.equipamento
-            epi.quantidade_disponivel += 1
+            epi.quantidade_disponivel += emprestimo.quantidade_retirada
             epi.save()
-
-        # 6. Redireciona de volta para a lista de empréstimos ativos
         return redirect('emprestimo_list')
+    
+class EquipamentoUpdateView(LoginRequiredMixin, UpdateView):
+    model = Equipamento
+    form_class = EquipamentoForm
+    template_name = 'gestao/equipamento_form.html'
+    success_url = reverse_lazy('equipamento_list')
 
+class UserListView(AdminRequiredMixin, ListView):
+    model = Usuario
+    template_name = 'gestao/user_list.html'
+    context_object_name = 'usuarios'
 
+class UserCreateView(AdminRequiredMixin, CreateView):
+    model = Usuario
+    form_class = CustomUserCreationForm
+    template_name = 'gestao/user_form.html'
+    success_url = reverse_lazy('user_list')
+
+class UserUpdateView(AdminRequiredMixin, UpdateView):
+    model = Usuario
+    form_class = UserUpdateForm
+    template_name = 'gestao/user_form.html'
+    success_url = reverse_lazy('user_list')
+
+class UserDeleteView(AdminRequiredMixin, DeleteView):
+    model = Usuario
+    template_name = 'gestao/user_confirm_delete.html'
+    success_url = reverse_lazy('user_list')
