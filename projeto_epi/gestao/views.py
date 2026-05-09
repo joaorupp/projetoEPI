@@ -1,3 +1,5 @@
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
@@ -9,50 +11,61 @@ from .forms import (
     CustomUserCreationForm, UserUpdateForm, EmprestimoForm
 )
 from django.contrib.auth.models import User
+def is_admin(user):
+    return user.is_superuser or user.groups.filter(name="Administrador").exists()
+def is_operador(user):
+    return (
+        user.groups.filter(name="Operador").exists()
+        or user.groups.filter(name="Administrador").exists()
+        or user.is_superuser
+    )
 def home(request):
     return render(request, "index.html")
 # Read (Listar)
-class ColaboradorListView(ListView):
+class ColaboradorListView(LoginRequiredMixin, ListView):
     model = Colaborador
     template_name = 'gestao/colaborador_list.html'
     context_object_name = 'colaboradores' # Nome da variável na lista
     queryset = Colaborador.objects.filter(ativo=True) # Apenas colaboradores ativos
 
 # Create (Criar)
-class ColaboradorCreateView(CreateView):
+class ColaboradorCreateView(LoginRequiredMixin, CreateView):
     model = Colaborador
     form_class = ColaboradorForm
     template_name = 'gestao/colaborador_form.html'
     success_url = reverse_lazy('colaborador_list') # Para onde vai após criar
 
 # Update (Atualizar)
-class ColaboradorUpdateView(UpdateView):
+class ColaboradorUpdateView(LoginRequiredMixin, UpdateView):
     model = Colaborador
     form_class = ColaboradorForm
     template_name = 'gestao/colaborador_form.html'
     success_url = reverse_lazy('colaborador_list')
 
 # Delete (Excluir)
-class ColaboradorDeleteView(DeleteView):
+class ColaboradorDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Colaborador
     template_name = 'gestao/colaborador_confirm_delete.html'
     success_url = reverse_lazy('colaborador_list')
 
+    def test_func(self):
+        return is_admin(self.request.user)
+
 # Read (Listar EPIs)
-class EquipamentoListView(ListView):
+class EquipamentoListView(LoginRequiredMixin, ListView):
     model = Equipamento
     template_name = 'gestao/equipamento_list.html'
     context_object_name = 'equipamentos'
 
 # Create (Criar EPI)
-class EquipamentoCreateView(CreateView):
+class EquipamentoCreateView(LoginRequiredMixin, CreateView):
     model = Equipamento
     form_class = EquipamentoForm
     template_name = 'gestao/equipamento_form.html'
     success_url = reverse_lazy('equipamento_list')
 
 # Update (Atualizar EPI)
-class EquipamentoUpdateView(UpdateView):
+class EquipamentoUpdateView(LoginRequiredMixin, UpdateView):
     model = Equipamento
     form_class = EquipamentoForm
     template_name = 'gestao/equipamento_form.html'
@@ -102,12 +115,15 @@ class EmprestimoListView(ListView):
         return Emprestimo.objects.filter(data_devolucao__isnull=True)
 
 # Create (Criar Empréstimo)
-class EmprestimoCreateView(CreateView):
+class EmprestimoCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     model = Emprestimo
     form_class = EmprestimoForm
     template_name = 'gestao/emprestimo_form.html'
     success_url = reverse_lazy('emprestimo_list')
+
+    def test_func(self):
+        return is_operador(self.request.user)
 
     # ---- AQUI ESTÁ A LÓGICA DE NEGÓCIO ----
     # Sobrescrevemos o método que é chamado quando o formulário é válido
