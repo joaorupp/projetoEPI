@@ -78,32 +78,40 @@ class EquipamentoDeleteView(DeleteView):
     success_url = reverse_lazy('equipamento_list')
 
 # Read (Listar Usuários)
-class UserListView(ListView):
+class UserListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = User
     template_name = 'gestao/user_list.html'
     context_object_name = 'usuarios'
     # Boa prática: não listar o superusuário se houver muitos
     queryset = User.objects.filter(is_superuser=False)
+    def test_func(self):
+        return is_admin(self.request.user)
 
 # Create (Criar Usuário)
-class UserCreateView(CreateView):
+class UserCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = User
     form_class = CustomUserCreationForm # <- Usando o form especial
     template_name = 'gestao/user_form.html'
     success_url = reverse_lazy('user_list')
+    def test_func(self):
+        return is_admin(self.request.user)
 
 # Update (Atualizar Usuário)
-class UserUpdateView(UpdateView):
+class UserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = User
     form_class = UserUpdateForm # <- Usando o form de atualização
     template_name = 'gestao/user_form.html'
     success_url = reverse_lazy('user_list')
+    def test_func(self):
+        return is_admin(self.request.user)
 
 # Delete (Excluir Usuário)
-class UserDeleteView(DeleteView):
+class UserDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = User
     template_name = 'gestao/user_confirm_delete.html'
     success_url = reverse_lazy('user_list')
+    def test_func(self):
+        return is_admin(self.request.user)
 
 class EmprestimoListView(ListView):
     model = Emprestimo
